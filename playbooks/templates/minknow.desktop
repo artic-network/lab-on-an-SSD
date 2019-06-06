@@ -1,0 +1,12 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Name=MinKNOW - Oxford Nanopore Technologies UI
+Icon=minknow.png
+Path=/opt/ui
+Exec=/opt/ui/MinKNOW
+StartupNotify=false
+StartupWMClass=MinKNOW
+OnlyShowIn=Unity;
+X-UnityGenerated=true

@@ -1,0 +1,308 @@
+---
+
+  - name: update apt cache
+    apt: update_cache=yes
+
+  - name: install packages
+    apt: name={{ packages }} state=present
+    vars:
+      packages:
+      - vim
+      - bzip2
+      - git
+      - bioperl
+      - libssl-dev
+      - hdf5-tools
+      - libdatetime-perl
+      - libxml-simple-perl
+      - libdigest-md5-perl
+      - pkg-config
+      - python-setuptools
+      - python3-setuptools
+      - python3-pip
+      - cmake
+      - default-jre
+      - gnuplot-x11
+      - texlive
+      - texlive-latex-extra
+      - artemis
+      - libfreetype6-dev
+      - libgconf-2-4
+
+## Software from ONT
+
+  - name: add nanopore key
+    apt_key: url=https://mirror.oxfordnanoportal.com/apt/ont-repo.pub state=present
+
+  - name: add nanopore repo
+    apt_repository:
+      repo: deb http://mirror.oxfordnanoportal.com/apt xenial-stable non-free
+      state: present
+      filename: nanoporetech
+
+  - name: install python3-ont-fast5-api
+    apt: name=python3-ont-fast5-api state=present allow_unauthenticated=yes
+
+  - name: minknow
+    apt: name=minknow-nc state=present allow_unauthenticated=yes
+
+  - name: enable minknow offline mode
+    command: "/opt/ONT/MinKNOW/bin/config_editor --filename /opt/ONT/MinKNOW/conf/sys_conf --conf system --set on_acquisition_ping_failure=ignore"
+
+  - name: install ont-albacore wheel
+    pip: name=https://mirror.oxfordnanoportal.com/software/analysis/ont_albacore-2.3.4-cp36-cp36m-manylinux1_x86_64.whl executable=pip3
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: grab guppy installer
+    unarchive:
+      src: https://europe.oxfordnanoportal.com/software/analysis/ont-guppy-cpu_2.1.3_linux64.tar.gz
+      dest: /usr/local/
+      remote_src: yes
+
+  - name: add guppy to PATH
+    copy:
+      content: 'PATH=$PATH:/usr/local/ont-guppy-cpu/bin'
+      dest: /etc/profile.d/guppy.sh
+      mode: 0755
+      force: yes
+
+  - name: artic primer schemes github
+    git: repo=https://github.com/artic-network/primer-schemes.git dest=/artic force=yes
+
+  - name: create basecalled directory
+    file:
+       path: /data/basecalled
+       recurse: yes
+       state: directory
+       owner: "{{ localuser }}"
+       group: "{{ localuser }}"
+
+  - name: desktop icon directoy
+    file:
+       path: /home/{{ localuser }}/.local/share/icons
+       state: directory
+       owner: "{{ localuser }}"
+       group: "{{ localuser }}"
+
+  - name: copy desktop icons
+    copy:
+       src: icons/{{icon}}.png
+       dest: /home/{{ localuser }}/.local/share/icons/{{icon}}.png
+    loop_control:
+       loop_var: icon
+    loop:
+       - minknow
+       - tablet-gui-tablet
+
+  - name: copy desktop files
+    copy:
+       src: templates/{{programme}}.desktop
+       dest: /home/{{ localuser }}/.local/share/applications/{{programme}}.desktop
+    loop_control:
+       loop_var: programme
+    loop:
+       - minknow
+       - tablet-gui-tablet
+
+#  - name: add desktop favorites
+#    script: scripts/add_favorites_to_unity.py {{programme}}.desktop
+#    become_user: "{{ localuser }}"
+#    become: yes
+#    loop_control:
+#       loop_var: programme
+#    loop:
+#       - minknow
+#       - tablet-gui-tablet
+
+#2. **Clone the github repo** -- `git clone https://github.com/artic-network/rampart.git`
+#3. **Create & activate the conda environment**
+#```
+#cd rampart
+#conda env create -f environment.yml
+#source activate artic-rampart
+#cd ..
+#```
+#
+#4. Install Node / JavaScript dependencies
+#```
+#cd rampart
+#yarn
+#cd ..
+#```
+
+#5. **Install Andrew's fork of porechop**
+#* (make sure you're in the artic-rampart conda environment)
+#```
+#git clone https://github.com/rambaut/Porechop.git
+#cd Porechop/
+#python setup.py install
+#```
+#* Check `porechop` is available on the command line by running `porechop -h` inside the artic-rampart conda environment.
+
+  - name: grab miniconda installer
+    get_url: url=https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh dest=/tmp/miniconda.sh mode=0755
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: test if conda is installed
+    stat: path="~/miniconda3/bin/conda"
+    register: condainstalled
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: remove partial install
+    command: rm -rf ~/miniconda3
+    when: not condainstalled.stat.exists
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: install conda if not installed
+    command: /tmp/miniconda.sh -b
+    when: not condainstalled.stat.exists
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: check if conda is in PATH
+    shell: "grep miniconda3 ~/.bashrc"
+    register: condainpath
+    ignore_errors: true
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: add conda to PATH
+    lineinfile: path="/home/{{ localuser }}/.bashrc" line="export PATH=/home/{{ localuser }}/miniconda3/bin:$PATH"
+    when: condainpath.stdout == ""
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: precreate conda dir
+    file: path="/home/{{ localuser }}/.conda/pkgs" owner="{{ localuser }}" group="{{ localuser }}" state=directory
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: precreate conda environments.txt
+    file: path="/home/{{ localuser }}/.conda/environments.txt" owner="{{ localuser }}" group="{{ localuser }}" state=touch
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: add extra conda channels
+    command: "/home/{{ localuser }}/miniconda3/bin/conda config --add channels bioconda"
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: install conda packages
+    command: "/home/{{ localuser }}/miniconda3/bin/conda install -y {{ pkg }}"
+    loop_control:
+       loop_var: pkg
+    loop:
+       - tablet
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: clone rampart github
+    git: repo=https://github.com/artic-network/rampart.git dest=/home/{{ localuser }}/artic/rampart force=yes
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: test if conda is installed
+    stat: path="/home/{{ localuser }}/miniconda3/envs/artic-rampart"
+    register: condarampartinstalled
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: create conda environment for rampart
+    command: "/home/{{ localuser }}/miniconda3/bin/conda env create -f /home/{{ localuser }}/artic/rampart/environment.yml"
+    become: yes
+    become_user: "{{ localuser }}" 
+    when: not condarampartinstalled.stat.exists
+    ignore_errors: true
+
+  - name: create conda environment for rampart mk2
+    command: "/home/{{ localuser }}/miniconda3/bin/conda env create -f /home/{{ localuser }}/artic/rampart/environment.yml"
+    become: yes
+    become_user: "{{ localuser }}" 
+    when: not condarampartinstalled.stat.exists
+
+
+  - name: rampart yarn
+    shell: source /home/{{ localuser }}/miniconda3/bin/activate artic-rampart && cd /home/{{ localuser }}/artic/rampart && yarn
+    become: yes
+    become_user: "{{ localuser }}"
+    args:
+       executable: /bin/bash
+
+  - name: rambaut porechop fork github
+    git: repo=https://github.com/rambaut/Porechop.git dest=/home/{{ localuser }}/artic/porechop force=yes
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: install porechop
+    shell: source /home/{{ localuser }}/miniconda3/bin/activate artic-rampart && cd /home/{{ localuser }}/artic/porechop && python setup.py install
+    become: yes
+    become_user: "{{ localuser }}"
+    args:
+       executable: /bin/bash
+
+  - name: test if conda is installed
+    stat: path="/home/{{ localuser }}/miniconda3/envs/artic-workshop"
+    register: condaworkshopinstalled
+    become: yes
+    become_user: "{{ localuser }}"
+  
+  - name: clone artic-outbreak github
+    git: repo=https://github.com/artic-network/artic-workshop.git dest=/home/{{ localuser }}/artic/workshop force=yes
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: conda workshop environment
+    command: "/home/{{ localuser }}/miniconda3/bin/conda env create -f /home/{{ localuser }}/artic/workshop/environment.yml"
+    become: yes
+    become_user: "{{ localuser }}"
+    when: not condaworkshopinstalled.stat.exists
+ 
+  - name: install porechop
+    shell: source /home/{{ localuser }}/miniconda3/bin/activate artic-workshop && cd /home/{{ localuser }}/artic/porechop && python setup.py install
+    become: yes
+    become_user: "{{ localuser }}"
+    args:
+       executable: /bin/bash
+
+  - name: artic pipeline
+    git: repo=https://github.com/artic-network/fieldbioinformatics.git dest=/home/{{ localuser }}/artic/fieldbioinformatics force=yes
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: install artic pipeline
+    shell: source /home/{{ localuser }}/miniconda3/bin/activate artic-workshop && cd  /home/{{ localuser }}/artic/fieldbioinformatics && python setup.py install
+    become: yes
+    become_user: "{{ localuser }}"
+    args:
+       executable: /bin/bash
+
+  - name: minknow
+    apt: name=minknow-nc state=present allow_unauthenticated=yes update_cache=yes
+
+  - name: emboss
+    shell: source /home/{{ localuser }}/miniconda3/bin/activate artic-workshop && conda install -y emboss
+    become: yes
+    become_user: "{{ localuser }}"
+    args:
+       executable: /bin/bash
+
+  - name: minimap2
+    shell: source /home/{{ localuser }}/miniconda3/bin/activate artic-workshop && conda install -y minimap2
+    become: yes
+    become_user: "{{ localuser }}"
+    args:
+       executable: /bin/bash
+
+  - name: install cython
+    pip: name=cython executable=/home/{{ localuser }}/miniconda3/bin/pip
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: add minknow and tablet to fav
+    shell: dbus-launch --exit-with-session gsettings set org.gnome.shell favorite-apps "['firefox.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'minknow.desktop', 'tablet-gui-tablet.desktop']"
+    become: yes
+    become_user: "{{ localuser }}"

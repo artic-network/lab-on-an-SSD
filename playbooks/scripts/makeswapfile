@@ -1,0 +1,14 @@
+#!/bin/bash
+memsize=`free -g|grep "Mem:"|column -t|cut -f 3 -d " "`
+swapsize=$(($memsize + 2))
+if [ -f /swapfile ]; then
+  exit 1
+fi
+/bin/echo "Creating swapfile"
+/usr/bin/fallocate -l "$swapsize"G /swapfile || exit 1
+/bin/chmod 600 /swapfile || exit 1
+/sbin/mkswap /swapfile || exit 1
+if [ $? -eq 0 ]; then
+  grep -q swapfile /etc/fstab || echo "/swapfile                                 none            swap    sw              0       0">>/etc/fstab 
+fi
+/sbin/swapon -a || exit 1

@@ -1,0 +1,11 @@
+[Unit]
+Description=Dogfish real time basecalling service
+
+[Service]
+Type=idle
+User=ubuntu
+ExecStart=/usr/bin/dogfishcall -o /data/basecalled -d 'auto' -l /var/log/dogfish -q
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

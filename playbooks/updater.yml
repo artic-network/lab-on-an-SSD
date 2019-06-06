@@ -1,0 +1,40 @@
+---
+
+- hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+
+  - name: create libcurl3 directory
+    file:
+       path: /usr/local/libcurl3/lib
+       recurse: yes
+       state: directory
+       owner: root
+       group: root
+
+  - name: grab libcurl3
+    get_url: url=https://artic.climb.ac.uk/misc/libcurl.so.4 dest=/usr/local/libcurl3/lib mode=0755
+
+  - name: remove /usr/bin/guppy_basecaller and guppy_basecaller_1d2 links
+    file:
+      path: "{{ file }}"
+      state: absent
+    vars:
+      file:
+        - /usr/bin/guppy_basecaller
+        - /usr/bin/guppy_basecaller_1d2
+
+  - name: update guppy_basecaller file
+    copy:
+      content: 'LD_PRELOAD=/usr/local/libcurl3/lib/libcurl.so.4 /opt/ont/guppy/bin/guppy_basecaller "$@"'
+      dest: /usr/bin/guppy_basecaller
+      mode: 0755
+      force: yes
+
+  - name: update guppy_basecaller_1d2 file
+    copy:
+      content: 'LD_PRELOAD=/usr/local/libcurl3/lib/libcurl.so.4 /opt/ont/guppy/bin/guppy_basecaller_1d2 "$@"'
+      dest: /usr/bin/guppy_basecaller_1d2
+      mode: 0755
+      force: yes

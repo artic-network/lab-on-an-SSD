@@ -1,0 +1,4 @@
+---
+- import_playbook: playbooks/mount_image.yml
+- import_playbook: playbooks/run_chroot.yml
+- import_playbook: playbooks/umount_image.yml

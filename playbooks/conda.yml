@@ -1,0 +1,66 @@
+---
+
+  - name: grab miniconda installer
+    get_url: url=https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh dest=/tmp/miniconda.sh mode=0755
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: test if conda is installed
+    stat: path="~/miniconda3/bin/conda"
+    register: condainstalled
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: remove partial install
+    command: rm -rf ~/miniconda3
+    when: not condainstalled.stat.exists
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: install conda if not installed
+    command: /tmp/miniconda.sh -b
+    when: not condainstalled.stat.exists
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: check if conda is in PATH
+    shell: "grep miniconda3 ~/.bashrc"
+    register: condainpath
+    ignore_errors: true
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: add conda to PATH
+    lineinfile: path="/home/{{ localuser }}/.bashrc" line="export PATH=/home/{{ localuser }}/miniconda3/bin:$PATH"
+    when: condainpath.stdout == ""
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: precreate conda dir
+    file: path="/home/{{ localuser }}/.conda/pkgs" owner="{{ localuser }}" group="{{ localuser }}" state=directory
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: precreate conda environments.txt
+    file: path="/home/{{ localuser }}/.conda/environments.txt" owner="{{ localuser }}" group="{{ localuser }}" state=touch
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: add extra conda channels
+    command: "/home/{{ localuser }}/miniconda3/bin/conda config --add channels bioconda"
+    become: yes
+    become_user: "{{ localuser }}"
+
+  - name: install conda packages
+    command: "/home/{{ localuser }}/miniconda3/bin/conda install -y {{ pkg }}"
+    loop_control:
+       loop_var: pkg
+    loop:
+       - nanopolish
+       - seqtk
+       - bwa
+       - minimap2
+       - miniasm
+       - samtools
+    become: yes
+    become_user: "{{ localuser }}"
