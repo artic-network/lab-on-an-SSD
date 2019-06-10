@@ -5,16 +5,16 @@
 
   tasks:
 
-  - name: MinKNOW: set guppy.gpu_calling
+  - name: MinKNOW set guppy.gpu_calling
     command: /opt/ONT/MinKNOW/bin/config_editor --filename /opt/ONT/MinKNOW/conf/app_conf --conf application --set guppy.gpu_calling=0
 
-  - name: MinKNOW: set guppy.server_executable
+  - name: MinKNOW set guppy.server_executable
     command: /opt/ONT/MinKNOW/bin/config_editor --filename /opt/ONT/MinKNOW/conf/app_conf --conf application --set guppy.server_executable=bin/guppy_basecall_server
 
-  - name: MinKNOW: set guppy.analyser_data_path
+  - name: MinKNOW set guppy.analyser_data_path
     command: /opt/ONT/MinKNOW/bin/config_editor --filename /opt/ONT/MinKNOW/conf/app_conf --conf application --set guppy.analyser_data_path=conf/guppy_configs
 
-  - name: MinKNOW: set guppy.server_data_path
+  - name: MinKNOW set guppy.server_data_path
     command: /opt/ONT/MinKNOW/bin/config_editor --filename /opt/ONT/MinKNOW/conf/app_conf --conf application --set guppy.server_data_path=conf/guppy_configs
 
   - name: restart MinKNOW service
