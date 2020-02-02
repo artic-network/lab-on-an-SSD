@@ -1,0 +1,12 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Name=Tablet - 1.17.08.17
+Icon=tablet-gui-tablet.png
+Path=/home/artic
+Exec=/home/artic/miniconda3/bin/tablet
+StartupNotify=false
+StartupWMClass=tablet-gui-Tablet
+OnlyShowIn=Unity;
+X-UnityGenerated=true

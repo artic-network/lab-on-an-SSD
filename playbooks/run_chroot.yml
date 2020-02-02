@@ -1,0 +1,69 @@
+---
+
+- hosts: chroot
+  connection: chroot
+
+  tasks:
+  - name: update resolv.conf
+    shell: 'echo "nameserver 8.8.8.8" > /etc/resolv.conf'
+
+  - name: install cloud-init
+    apt:
+      name: cloud-init
+      state: present
+
+  - name: cloud-init config
+    template:
+      src: templates/cloud.cfg
+      dest: /etc/cloud/cloud.cfg
+      mode: 0644
+      owner: root
+      group: root
+
+  - name: cloud-init datasource
+    template:
+      src: templates/90_dpkg.cfg
+      dest: /etc/cloud/cloud.cfg.d/90_dpkg.cfg
+      mode: 0644
+      owner: root
+      group: root
+
+  - name: copy findbootdev
+    copy:
+      src: scripts/findbootdev
+      dest: /usr/local/bin/findbootdev
+      owner: root
+      group: root
+      mode: 755 
+
+  - name: copy fixbootdev
+    copy:
+      src: scripts/fixbootdev
+      dest: /usr/local/sbin/fixbootdev
+      owner: root
+      group: root
+      mode: 755 
+
+  - name: copy makeswapfile
+    copy:
+      src: scripts/makeswapfile
+      dest: /usr/local/sbin/makeswapfile
+      owner: root
+      group: root
+      mode: 755 
+
+  - name: copy do-artic-update
+    copy:
+      src: scripts/do-artic-update
+      dest: /usr/local/sbin/do-artic-update
+      owner: root
+      group: root
+      mode: 755 
+
+  - name: install software-properties-common
+    apt:
+      name: software-properties-common
+      state: present
+
+  - name: install software
+    include_tasks: software.yml

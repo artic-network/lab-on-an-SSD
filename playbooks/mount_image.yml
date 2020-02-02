@@ -1,0 +1,33 @@
+---
+
+- hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+  - name: create chroot/mountpoint dir
+    file:
+      path: "{{ mountpoint }}"
+      state: directory
+      mode: 0755
+
+  - name: find loopback
+    shell: losetup -f 
+    register: loopback
+
+  - name: loopback attach
+    command: losetup {{ loopback.stdout }} {{ imagename }}
+
+  - name: partprobe
+    command: partprobe {{ loopback.stdout }}
+
+  - name: mount linux ptrtition image
+    command: mount {{ loopback.stdout }}p2 {{ mountpoint }}
+
+  - name: mount /proc in chroot
+    command:  mount -t proc /proc {{ mountpoint }}/proc/
+
+  - name: mount /sys in chroot
+    command: mount --rbind /sys {{ mountpoint }}/sys/
+
+  - name: mount /dev in chroot
+    command: mount --rbind /dev {{ mountpoint }}/dev/

@@ -1,0 +1,39 @@
+---
+
+- hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+  - name: create guppy directory
+    file:
+       path: /usr/local/guppy-gpu
+       recurse: yes
+       state: directory
+       owner: root
+       group: root
+
+  - name: grab matching guppy version
+    unarchive:
+      src: https://mirror.oxfordnanoportal.com/software/analysis/ont-guppy_3.2.4_linux64.tar.gz
+      dest: /usr/local/guppy-gpu/
+      remote_src: yes
+
+  - name: MinKNOW set guppy.gpu_calling
+    command: /opt/ONT/MinKNOW/bin/config_editor --filename /opt/ONT/MinKNOW/conf/app_conf --conf application --set guppy.gpu_calling=1
+
+  - name: MinKNOW set guppy.server_executable
+    command: /opt/ONT/MinKNOW/bin/config_editor --filename /opt/ONT/MinKNOW/conf/app_conf --conf application --set guppy.server_executable=/usr/local/guppy-gpu/ont-guppy/bin/guppy_basecall_server
+
+  - name: MinKNOW set guppy.client_executable
+    command: /opt/ONT/MinKNOW/bin/config_editor --filename /opt/ONT/MinKNOW/conf/app_conf --conf application --set guppy.client_executable=/usr/local/guppy-gpu/ont-guppy/bin/guppy_basecaller
+
+  - name: MinKNOW set guppy.client_data_path
+    command: /opt/ONT/MinKNOW/bin/config_editor --filename /opt/ONT/MinKNOW/conf/app_conf --conf application --set guppy.client_data_path=/usr/local/guppy-gpu/ont-guppy/data
+
+  - name: MinKNOW set guppy.server_data_path
+    command: /opt/ONT/MinKNOW/bin/config_editor --filename /opt/ONT/MinKNOW/conf/app_conf --conf application --set guppy.server_data_path=/usr/local/guppy-gpu/ont-guppy/data
+
+  - name: restart MinKNOW service
+    service:
+      name: minknow
+      state: restarted
