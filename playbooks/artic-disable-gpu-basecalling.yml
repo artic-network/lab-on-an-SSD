@@ -5,22 +5,22 @@
 
   tasks:
 
-  - name: MinKNOW set guppy.gpu_calling
-    command: /opt/ONT/MinKNOW/bin/config_editor --filename /opt/ONT/MinKNOW/conf/app_conf --conf application --set guppy.gpu_calling=0
+  - name: minknow set guppy.gpu_calling
+    command: /opt/ont/minknow/bin/config_editor --filename /opt/ont/minknow/conf/app_conf --conf application --set guppy.gpu_calling=0
 
-  - name: MinKNOW set guppy.client_executable
-    command: /opt/ONT/MinKNOW/bin/config_editor --filename /opt/ONT/MinKNOW/conf/app_conf --conf application --set guppy.client_executable=bin/guppy_basecaller
+  - name: minknow set guppy.client_executable
+    command: /opt/ont/minknow/bin/config_editor --filename /opt/ont/minknow/conf/app_conf --conf application --set guppy.client_executable=bin/guppy_basecaller
 
-  - name: MinKNOW set guppy.server_executable
-    command: /opt/ONT/MinKNOW/bin/config_editor --filename /opt/ONT/MinKNOW/conf/app_conf --conf application --set guppy.server_executable=bin/guppy_basecall_server
+  - name: minknow set guppy.server_executable
+    command: /opt/ont/minknow/bin/config_editor --filename /opt/ont/minknow/conf/app_conf --conf application --set guppy.server_executable=bin/guppy_basecall_server
 
-  - name: MinKNOW set guppy.client_data_path
-    command: /opt/ONT/MinKNOW/bin/config_editor --filename /opt/ONT/MinKNOW/conf/app_conf --conf application --set guppy.client_data_path=conf/guppy_configs
+  - name: minknow set guppy.client_data_path
+    command: /opt/ont/minknow/bin/config_editor --filename /opt/ont/minknow/conf/app_conf --conf application --set guppy.client_data_path=conf/guppy_configs
 
-  - name: MinKNOW set guppy.server_data_path
-    command: /opt/ONT/MinKNOW/bin/config_editor --filename /opt/ONT/MinKNOW/conf/app_conf --conf application --set guppy.server_data_path=conf/guppy_configs
+  - name: minknow set guppy.server_data_path
+    command: /opt/ont/minknow/bin/config_editor --filename /opt/ont/minknow/conf/app_conf --conf application --set guppy.server_data_path=conf/guppy_configs
 
-  - name: restart MinKNOW service
+  - name: restart minknow service
     service:
       name: minknow
       state: restarted
