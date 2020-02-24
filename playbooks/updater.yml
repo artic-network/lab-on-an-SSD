@@ -14,5 +14,5 @@
       owner: root
       group: root
     with_fileglob:
-      - "/usr/local/src/artic/lab-on-an-ssd/playbooks/scripts/*"
+      - "/usr/local/src/lab-on-an-ssd/playbooks/scripts/*"
 
