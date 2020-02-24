@@ -30,7 +30,6 @@ If your laptop has certain BIOS settings, e.g. Secure Boot Mode, which cannot be
 
 ### Getting started ###
 
-
 You may want to configure a few things to your liking, via the system settings:
 - Date/time and timezone
 - Keyboard layout
@@ -57,4 +56,3 @@ Write the image to your SSD using software such as:
 - [Etcher](https://etcher.io/)
 - [Rufus](https://rufus.akeo.ie/)
 - dd (Linux)
->>>>>>> repo1
