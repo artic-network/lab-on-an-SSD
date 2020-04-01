@@ -1,0 +1,13 @@
+---
+
+- hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+  - name: minknow disable required barcores both ends
+    command: /opt/ont/minknow/bin/config_editor --filename /opt/ont/minknow/conf/app_conf --conf application --set guppy.extra_arguments=""
+
+  - name: restart MinKNOW service
+    service:
+      name: minknow
+      state: restarted
