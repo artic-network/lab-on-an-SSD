@@ -14,7 +14,7 @@
 
   - name: grab matching guppy version
     unarchive:
-      src: https://mirror.oxfordnanoportal.com/software/analysis/ont-guppy_3.2.4_linux64.tar.gz
+      src: https://mirror.oxfordnanoportal.com/software/analysis/ont-guppy_4.0.15_linux64.tar.gz
       dest: /usr/local/guppy-gpu/
       remote_src: yes
 
